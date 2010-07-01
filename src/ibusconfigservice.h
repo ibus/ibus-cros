@@ -203,10 +203,14 @@ struct _IBusConfigServiceClass {
     GVariant *  (* get_values)  (IBusConfigService    *config,
                                  const gchar          *section,
                                  GError              **error);
+    gboolean    (* get_unused)  (IBusConfigService    *config,
+                                 GVariant            **unread,
+                                 GVariant            **unwritten,
+                                 GError              **error);
 
     /*< private >*/
     /* padding */
-    gpointer pdummy[12];
+    gpointer pdummy[11];
 };
 
 GType                ibus_config_service_get_type   (void);
@@ -238,4 +242,3 @@ void                 ibus_config_service_value_changed
 
 G_END_DECLS
 #endif
-

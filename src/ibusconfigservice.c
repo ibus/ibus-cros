@@ -86,6 +86,10 @@ static gboolean  ibus_config_service_unset_value     (IBusConfigService      *co
                                                       const gchar            *section,
                                                       const gchar            *name,
                                                       GError                **error);
+static gboolean ibus_config_service_get_unused       (IBusConfigService      *config,
+                                                      GVariant              **unread,
+                                                      GVariant              **unwritten,
+                                                      GError                **error);
 
 G_DEFINE_TYPE (IBusConfigService, ibus_config_service, IBUS_TYPE_SERVICE)
 
@@ -115,6 +119,10 @@ static const gchar introspection_xml[] =
     "      <arg type='s' name='name' />"
     "      <arg type='v' name='value' />"
     "    </signal>"
+    "    <method name='GetUnused'>"
+    "      <arg direction='out'  type='as' name='unread' />"
+    "      <arg direction='out'  type='as' name='unwritten' />"
+    "    </method>"
     "  </interface>"
     "</node>";
 
@@ -138,6 +146,7 @@ ibus_config_service_class_init (IBusConfigServiceClass *class)
     class->get_value   = ibus_config_service_get_value;
     class->get_values  = ibus_config_service_get_values;
     class->unset_value = ibus_config_service_unset_value;
+    class->get_unused  = ibus_config_service_get_unused;
 }
 
 static void
@@ -283,6 +292,25 @@ ibus_config_service_service_method_call (IBusService           *service,
         return;
     }
 
+    if (g_strcmp0 (method_name, "GetUnused") == 0) {
+        GVariant *unread = NULL;
+        GVariant *unwritten = NULL;
+        gboolean retval;
+        GError *error = NULL;
+
+        retval = IBUS_CONFIG_SERVICE_GET_CLASS (config)->get_unused (
+                        config, &unread, &unwritten, &error);
+        if (retval) {
+            g_dbus_method_invocation_return_value (invocation,
+                            g_variant_new ("(@as@as)", unread, unwritten));
+        }
+        else {
+            g_dbus_method_invocation_return_gerror (invocation, error);
+            g_error_free (error);
+        }
+        return;
+    }
+
     /* should not be reached */
     g_return_if_reached ();
 }
@@ -391,6 +419,19 @@ ibus_config_service_new (GDBusConnection *connection)
                                     "connection", connection,
                                     NULL);
     return IBUS_CONFIG_SERVICE (object);
+}
+
+static gboolean
+ibus_config_service_get_unused (IBusConfigService  *config,
+                                GVariant          **unread,
+                                GVariant          **unwritten,
+                                GError            **error)
+{
+    if (error) {
+        *error = g_error_new (G_DBUS_ERROR, G_DBUS_ERROR_FAILED,
+                              "Not implemented");
+    }
+    return FALSE;
 }
 
 void
