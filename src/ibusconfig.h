@@ -224,6 +224,19 @@ gboolean         ibus_config_unset      (IBusConfig         *config,
 
 /* FIXME add an asynchronous version of unset */
 
+/**
+ * ibus_config_get_unused:
+ * @config: An IBusConfig
+ * @unread: GVariant that holds a list of values that have been written but not
+ * read.
+ * @unwritten: GVariant that holds a list of values that have been read but not
+ * written.
+ * @returns: TRUE if succeed; FALSE otherwise.
+ *
+ * Get the list of values that haven't been used properly.
+ */
+gboolean         ibus_config_get_unused     (IBusConfig         *config,
+                                             GVariant          **unread,
+                                             GVariant          **unwritten);
 G_END_DECLS
 #endif
-
